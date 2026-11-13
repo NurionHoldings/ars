@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#193C64">
+  <title>보이는 ARS</title>
+  <link rel="icon" href="logo.png">
+  <style>
+    :root { --navy: #193C64; --line: #dde3ea; --bg: #f3f5f8; --text: #1b2430; --sub: #5b6676; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text);
+      font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif; -webkit-text-size-adjust: 100%; }
+    header { background: var(--navy); color: #fff; padding: 28px 20px 24px; text-align: center; }
+    header img { width: 72px; height: 72px; border-radius: 50%; background: #fff; }
+    header h1 { margin: 12px 0 6px; font-size: 21px; }
+    header p { margin: 0; font-size: 15px; line-height: 1.5; opacity: .9; white-space: pre-line; }
+    main { padding: 16px 14px 110px; max-width: 520px; margin: 0 auto; }
+    .label { font-size: 13px; color: var(--sub); margin: 4px 4px 10px; }
+    .item { background: #fff; border: 1px solid var(--line); border-radius: 14px; margin-bottom: 10px; overflow: hidden; }
+    .item > button { width: 100%; display: flex; align-items: center; gap: 14px; padding: 18px 16px; border: 0;
+      background: none; font: inherit; font-size: 18px; font-weight: 600; color: var(--text); text-align: left; cursor: pointer; }
+    .num { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--navy); color: #fff;
+      display: grid; place-items: center; font-size: 16px; }
+    .chev { margin-left: auto; color: var(--sub); transition: transform .2s; }
+    .item.open .chev { transform: rotate(90deg); }
+    .detail { display: none; padding: 0 16px 18px 64px; }
+    .item.open .detail { display: block; }
+    .detail p { margin: 0 0 12px; font-size: 16px; line-height: 1.6; white-space: pre-line; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .actions a { display: inline-block; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--navy);
+      color: var(--navy); text-decoration: none; font-size: 15px; font-weight: 600; }
+    .actions a.primary { background: var(--navy); color: #fff; }
+    .hint { font-size: 13px; color: var(--sub); text-align: center; margin: 18px 8px 0; line-height: 1.5; white-space: pre-line; }
+    .call { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+      background: rgba(243,245,248,.96); border-top: 1px solid var(--line); }
+    .call a { display: block; max-width: 520px; margin: 0 auto; padding: 15px; border-radius: 12px; background: var(--navy);
+      color: #fff; text-align: center; text-decoration: none; font-size: 17px; font-weight: 700; }
+    .error { text-align: center; padding: 40px 20px; color: var(--sub); }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo.png" alt="">
+    <h1 id="company">보이는 ARS</h1>
+    <p id="greeting"></p>
+  </header>
+  <main>
+    <div class="label">메뉴를 누르면 안내가 펼쳐집니다</div>
+    <div id="menu"></div>
+    <p class="hint" id="hint"></p>
+  </main>
+  <div class="call" id="call" hidden><a id="callLink" href="#">전화 걸기</a></div>
+
+  <script>
+    // iOS separates the body with '&', Android with '?'.
+    const smsHref = (phone, body) =>
+      `sms:${phone}${/iPhone|iPad|iPod/.test(navigator.userAgent) ? '&' : '?'}body=${encodeURIComponent(body)}`;
+    const formatPhone = (p) => p.replace(/^(\d{3})(\d{3,4})(\d{4})$/, '$1-$2-$3');
+
+    function el(tag, props = {}, children = []) {
+      const node = Object.assign(document.createElement(tag), props);
+      node.append(...children);
+      return node;
+    }
+
+    function link(text, href, primary) {
+      return el('a', { textContent: text, href, className: primary ? 'primary' : '', target: href.startsWith('http') ? '_blank' : '' });
+    }
+
+    function render(cfg) {
+      document.title = `${cfg.company} 안내`;
+      document.getElementById('company').textContent = cfg.company;
+      document.getElementById('greeting').textContent = cfg.greeting;
+      const menu = document.getElementById('menu');
+
+      for (const item of cfg.items) {
+        const actions = [];
+        if (item.map) {
+          const q = encodeURIComponent(item.map);
+          actions.push(link('네이버 지도', `https://map.naver.com/p/search/${q}`), link('카카오맵', `https://map.kakao.com/link/search/${q}`));
+        }
+        if (item.url) actions.push(link(item.urlLabel || '열기', item.url, true));
+        if (item.sms) actions.push(link(item.smsLabel || '문자 보내기', smsHref(cfg.phone, item.sms), true));
+
+        const box = el('div', { className: 'item' });
+        const button = el('button', { type: 'button' }, [
+          el('span', { className: 'num', textContent: item.key }),
+          el('span', { textContent: item.title }),
+          el('span', { className: 'chev', textContent: '›', ariaHidden: 'true' }),
+        ]);
+        button.setAttribute('aria-expanded', 'false');
+        button.addEventListener('click', () => {
+          const open = !box.classList.contains('open');
+          menu.querySelectorAll('.item.open').forEach((o) => { o.classList.remove('open'); o.firstChild.setAttribute('aria-expanded', 'false'); });
+          box.classList.toggle('open', open);
+          button.setAttribute('aria-expanded', String(open));
+        });
+        box.append(button, el('div', { className: 'detail' }, [
+          el('p', { textContent: item.text || '' }),
+          ...(actions.length ? [el('div', { className: 'actions' }, actions)] : []),
+        ]));
+        menu.append(box);
+      }
+
+      document.getElementById('hint').textContent =
+        `받으신 문자에 메뉴 번호만 답장하셔도 안내해 드립니다.\n문의 ${formatPhone(cfg.phone)}`;
+      const call = document.getElementById('callLink');
+      call.href = `tel:${cfg.phone}`;
+      call.textContent = `전화 걸기 ${formatPhone(cfg.phone)}`;
+      document.getElementById('call').hidden = false;
+    }
+
+    fetch('config.json', { cache: 'no-cache' })
+      .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(render)
+      .catch(() => {
+        document.getElementById('menu').replaceWith(el('div', { className: 'error', textContent: '안내를 불러오지 못했습니다. 잠시 후 다시 열어 주세요.' }));
+      });
+  </script>
+</body>
+</html>
