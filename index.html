@@ -8,42 +8,50 @@
   <title>보이는 ARS</title>
   <link rel="icon" href="logo.png">
   <style>
-    :root { --navy: #193C64; --line: #dde3ea; --bg: #f3f5f8; --text: #1b2430; --sub: #5b6676; }
+    :root {
+      --navy: #193C64; --navy-2: #24548a; --gold: #f2b84b; --tint: #e8f0fa; --tint-line: #c9d9ee;
+      --bg: #dfe7f1; --text: #13202f; --sub: #4a5869;
+    }
     * { box-sizing: border-box; }
     html, body { margin: 0; background: var(--bg); color: var(--text);
       font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif; -webkit-text-size-adjust: 100%; }
-    header { background: var(--navy); color: #fff; padding: 28px 20px 24px; text-align: center; }
-    header img { display: block; width: 180px; max-width: 60%; height: auto; margin: 0 auto; }
-    header h1 { margin: 12px 0 6px; font-size: 21px; }
-    header p { margin: 0; font-size: 15px; line-height: 1.5; opacity: .9; white-space: pre-line; }
-    main { padding: 16px 14px 110px; max-width: 520px; margin: 0 auto; }
-    .label { font-size: 13px; color: var(--sub); margin: 4px 4px 10px; }
-    .item { background: #fff; border: 1px solid var(--line); border-radius: 14px; margin-bottom: 10px; overflow: hidden; }
+    header { background: linear-gradient(180deg, #0f2a4a 0%, var(--navy) 100%); color: #fff; padding: 26px 20px 30px; text-align: center; }
+    header img { display: block; width: 200px; max-width: 62%; height: auto; margin: 0 auto; }
+    header h1 { margin: 14px 0 10px; font-size: 30px; font-weight: 800; letter-spacing: -0.5px; }
+    header p { margin: 0; font-size: 18px; line-height: 1.55; color: #dce8f7; white-space: pre-line; }
+    main { padding: 18px 14px 120px; max-width: 520px; margin: 0 auto; }
+    .label { font-size: 15px; font-weight: 600; color: var(--navy); margin: 2px 4px 12px; }
+    .item { background: var(--tint); border: 1px solid var(--tint-line); border-radius: 16px; margin-bottom: 14px; overflow: hidden;
+      box-shadow: 0 2px 6px rgba(25, 60, 100, .12); }
     .item > button { width: 100%; display: flex; align-items: center; gap: 14px; padding: 18px 16px; border: 0;
-      background: none; font: inherit; font-size: 18px; font-weight: 600; color: var(--text); text-align: left; cursor: pointer; }
-    .num { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--navy); color: #fff;
-      display: grid; place-items: center; font-size: 16px; }
-    .chev { margin-left: auto; color: var(--sub); transition: transform .2s; }
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%); font: inherit; font-size: 22px; font-weight: 700;
+      color: #fff; text-align: left; cursor: pointer; }
+    .item > button:active { filter: brightness(1.15); }
+    .num { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--gold); color: var(--navy);
+      display: grid; place-items: center; font-size: 20px; font-weight: 800; }
+    .chev { margin-left: auto; color: #cfe0f5; font-size: 26px; transition: transform .2s; }
     .item.open .chev { transform: rotate(90deg); }
-    .detail { display: none; padding: 0 16px 18px 64px; }
+    .detail { display: none; padding: 16px 18px 18px 72px; }
     .item.open .detail { display: block; }
-    .detail p { margin: 0 0 12px; font-size: 16px; line-height: 1.6; white-space: pre-line; }
-    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
-    .actions a { display: inline-block; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--navy);
-      color: var(--navy); text-decoration: none; font-size: 15px; font-weight: 600; }
+    .detail p { margin: 0 0 12px; font-size: 19px; line-height: 1.6; white-space: pre-line; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .actions a { display: inline-block; padding: 12px 16px; border-radius: 12px; border: 2px solid var(--navy); background: #fff;
+      color: var(--navy); text-decoration: none; font-size: 17px; font-weight: 700; }
     .actions a.primary { background: var(--navy); color: #fff; }
-    .hint { font-size: 13px; color: var(--sub); text-align: center; margin: 18px 8px 0; line-height: 1.5; white-space: pre-line; }
+    .hint { font-size: 16px; color: var(--sub); text-align: center; margin: 18px 4px 0; padding: 14px; line-height: 1.6;
+      background: #fff; border-radius: 14px; white-space: pre-line; }
     .call { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
-      background: rgba(243,245,248,.96); border-top: 1px solid var(--line); }
-    .call a { display: block; max-width: 520px; margin: 0 auto; padding: 15px; border-radius: 12px; background: var(--navy);
-      color: #fff; text-align: center; text-decoration: none; font-size: 17px; font-weight: 700; }
-    .error { text-align: center; padding: 40px 20px; color: var(--sub); }
+      background: rgba(223, 231, 241, .96); border-top: 1px solid var(--tint-line); }
+    .call a { display: block; max-width: 520px; margin: 0 auto; padding: 17px; border-radius: 14px; background: var(--gold);
+      color: var(--navy); text-align: center; text-decoration: none; font-size: 20px; font-weight: 800; }
+    .error { text-align: center; padding: 40px 20px; color: var(--sub); font-size: 17px; }
     /* ?image: every answer expanded, no buttons — rendered into the menu picture sent by MMS */
     body.image main { padding-bottom: 24px; }
     body.image .detail { display: block; }
     body.image .chev, body.image .actions, body.image .label { display: none; }
-    body.image .reply { display: block; }
-    .reply { display: none; margin-top: 4px; font-size: 14px; color: var(--navy); font-weight: 600; }
+    body.image .reply { display: inline-block; }
+    .reply { display: none; margin-top: 2px; padding: 6px 12px; border-radius: 999px; background: var(--navy); color: #fff;
+      font-size: 16px; font-weight: 700; }
   </style>
 </head>
 <body>
@@ -114,7 +122,7 @@
       }
 
       document.getElementById('hint').textContent =
-        `받으신 문자에 메뉴 번호만 답장하셔도 안내해 드립니다.\n문의 ${formatPhone(cfg.phone)}`;
+        `메뉴 번호만 문자로 답장하셔도\n바로 안내해 드립니다.\n문의 ${formatPhone(cfg.phone)}`;
       if (imageMode) return;
       const call = document.getElementById('callLink');
       call.href = `tel:${cfg.phone}`;
